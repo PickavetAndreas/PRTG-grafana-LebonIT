@@ -137,6 +137,21 @@ System.register(["lodash", "app/core/utils/datemath", "./PRTGAPIService", "./uti
         }, {
           key: "queryRaw",
           value: function queryRaw(target) {
+            // Andreas
+            var variable = void 0;
+            var grafanavar = void 0;
+            var vars = this.templateSrv.variables;
+            if(target.raw.queryString.includes('$')){
+                
+                grafanavar = target.raw.queryString.split('$')[1]
+                for (let i = 0; i<vars.length; i++) {
+                        if(vars[i].name == grafanavar){
+                             variable = vars[i].current.value
+                        }
+                }
+                target.raw.queryString = target.raw.queryString.split('$')[0] + variable
+            }
+            // original
             return this.prtgAPI.performPRTGAPIRequest(target.raw.uri, target.raw.queryString).then(function (rawData) {
               if (Array.isArray(rawData)) {
                 return _.map(rawData, function (doc) {
@@ -243,7 +258,7 @@ System.register(["lodash", "app/core/utils/datemath", "./PRTGAPIService", "./uti
             for (let i = 0; i<vars.length; i++) {
               if (vars[i].query == query) {
                 var name = vars[i-1].current.value;
-                if (filter.type = "sensor") {
+                if (filter.type == "sensor") {
                   Id = await this.prtgAPI.performPRTGAPIRequest("table.json","content=devices&columns=objid&filter_name=" + name).then(
                     function(PromiseValue){
                       return PromiseValue[0].objid;
